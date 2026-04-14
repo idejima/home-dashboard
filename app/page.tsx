@@ -180,7 +180,7 @@ export default function HomePage() {
       {/* Header */}
       <header className="app-header">
         <h1>Home Dashboard</h1>
-        <p>Everything your household needs, in one place.</p>
+        <p>Everything in your household, in one place.</p>
       </header>
 
       {/* Search */}
