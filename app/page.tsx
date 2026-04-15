@@ -60,7 +60,6 @@ export default function HomePage() {
           tabIndex={0}
           onKeyDown={(e) => e.key === "Enter" && router.push("/inventory")}
         >
-          <BoxBgIcon />
           <div>
             <div className="jumbo-label">Inventory</div>
             <div className="jumbo-count">
@@ -83,7 +82,6 @@ export default function HomePage() {
           tabIndex={0}
           onKeyDown={(e) => e.key === "Enter" && router.push("/calendar")}
         >
-          <CalBgIcon />
           <div>
             <div className="jumbo-label">Calendar</div>
             <div className="jumbo-count">
