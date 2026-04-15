@@ -123,6 +123,7 @@ export default function CalendarPage() {
     <div className="app-wrapper">
       <header className="app-header">
         <h1>Calendar</h1>
+        <p>Upcoming events.</p>
       </header>
 
       {/* Add Event Form */}
