@@ -1,10 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import PageShell from "./components/PageShell";
+import { useRouter } from "next/navigation";
+
+function BoxBgIcon() {
+  return (
+    <svg width="120" height="120" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="jumbo-card-bg">
+      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+    </svg>
+  );
+}
+
+function CalBgIcon() {
+  return (
+    <svg width="120" height="120" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="jumbo-card-bg">
+      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+    </svg>
+  );
+}
+
+function ArrowIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14M12 5l7 7-7 7" />
+    </svg>
+  );
+}
 
 export default function HomePage() {
+  const router = useRouter();
   const [itemCount, setItemCount] = useState<number | null>(null);
   const [eventCount, setEventCount] = useState<number | null>(null);
 
@@ -21,59 +45,59 @@ export default function HomePage() {
   }, []);
 
   return (
-    <PageShell>
+    <div className="app-wrapper">
       <header className="app-header">
         <h1>Home Dashboard</h1>
         <p>Everything in the household, in one place.</p>
       </header>
 
-      <div className="jumbotron-grid">
-        {/* Inventory jumbotron */}
-        <Link href="/inventory" className="jumbotron jumbotron--inventory">
-          <div className="jumbotron-icon">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-              <path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" />
-            </svg>
+      <div className="jumbo-grid">
+        {/* Inventory card */}
+        <div
+          className="jumbo-card inventory"
+          onClick={() => router.push("/inventory")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && router.push("/inventory")}
+        >
+          <BoxBgIcon />
+          <div>
+            <div className="jumbo-label">Inventory</div>
+            <div className="jumbo-count">
+              {itemCount === null ? "—" : itemCount}
+            </div>
+            <div className="jumbo-count-label">
+              {itemCount === 1 ? "item tracked" : "items tracked"}
+            </div>
           </div>
-          <div className="jumbotron-label">Inventory</div>
-          <div className="jumbotron-count">
-            {itemCount === null ? (
-              <span className="jumbotron-loading">…</span>
-            ) : (
-              <>
-                <span className="jumbotron-count-number">{itemCount}</span>
-                <span className="jumbotron-count-unit">item{itemCount !== 1 ? "s" : ""}</span>
-              </>
-            )}
+          <div className="jumbo-arrow">
+            <ArrowIcon />
           </div>
-          <div className="jumbotron-cta">View all →</div>
-        </Link>
+        </div>
 
-        {/* Calendar jumbotron */}
-        <Link href="/calendar" className="jumbotron jumbotron--calendar">
-          <div className="jumbotron-icon">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-              <line x1="16" x2="16" y1="2" y2="6" />
-              <line x1="8" x2="8" y1="2" y2="6" />
-              <line x1="3" x2="21" y1="10" y2="10" />
-            </svg>
+        {/* Calendar card */}
+        <div
+          className="jumbo-card calendar"
+          onClick={() => router.push("/calendar")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && router.push("/calendar")}
+        >
+          <CalBgIcon />
+          <div>
+            <div className="jumbo-label">Calendar</div>
+            <div className="jumbo-count">
+              {eventCount === null ? "—" : eventCount}
+            </div>
+            <div className="jumbo-count-label">
+              {eventCount === 1 ? "event scheduled" : "events scheduled"}
+            </div>
           </div>
-          <div className="jumbotron-label">Calendar</div>
-          <div className="jumbotron-count">
-            {eventCount === null ? (
-              <span className="jumbotron-loading">…</span>
-            ) : (
-              <>
-                <span className="jumbotron-count-number">{eventCount}</span>
-                <span className="jumbotron-count-unit">event{eventCount !== 1 ? "s" : ""}</span>
-              </>
-            )}
+          <div className="jumbo-arrow">
+            <ArrowIcon />
           </div>
-          <div className="jumbotron-cta">View all →</div>
-        </Link>
+        </div>
       </div>
-    </PageShell>
+    </div>
   );
 }
