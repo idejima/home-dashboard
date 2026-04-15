@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import PageShell from "../components/PageShell";
 
 interface CalendarEvent {
   id: number;
@@ -16,25 +15,19 @@ function formatDate(dateStr: string): { month: string; day: string; full: string
   return {
     month: d.toLocaleString("en", { month: "short" }).toUpperCase(),
     day: String(d.getDate()),
-    full: d.toLocaleDateString("en", { weekday: "long", year: "numeric", month: "long", day: "numeric" }),
+    full: d.toLocaleDateString("en", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }),
   };
 }
 
-function SpinnerIcon() {
+function PlusIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ animation: "spin 0.9s linear infinite" }}>
-      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-    </svg>
-  );
-}
-
-function CalIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-      <line x1="16" x2="16" y1="2" y2="6" />
-      <line x1="8" x2="8" y1="2" y2="6" />
-      <line x1="3" x2="21" y1="10" y2="10" />
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <path d="M12 5v14M5 12h14" />
     </svg>
   );
 }
@@ -47,6 +40,25 @@ function TrashIcon() {
   );
 }
 
+function CalEmptyIcon() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+      <line x1="16" x2="16" y1="2" y2="6" />
+      <line x1="8"  x2="8"  y1="2" y2="6" />
+      <line x1="3"  x2="21" y1="10" y2="10" />
+    </svg>
+  );
+}
+
+function SpinnerIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ animation: "spin 0.9s linear infinite" }}>
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+  );
+}
+
 export default function CalendarPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +66,6 @@ export default function CalendarPage() {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [adding, setAdding] = useState(false);
-  const [formError, setFormError] = useState("");
 
   useEffect(() => { fetchEvents(); }, []);
 
@@ -64,7 +75,8 @@ export default function CalendarPage() {
     try {
       const res = await fetch("/api/events");
       if (!res.ok) throw new Error();
-      setEvents(await res.json());
+      const data = await res.json();
+      setEvents([...data].sort((a, b) => a.date.localeCompare(b.date)));
     } catch {
       setError("Could not load events. Please refresh.");
     } finally {
@@ -74,12 +86,8 @@ export default function CalendarPage() {
 
   async function addEvent() {
     const trimTitle = title.trim();
-    if (!trimTitle || !date) {
-      setFormError("Both title and date are required.");
-      return;
-    }
+    if (!trimTitle || !date || adding) return;
     setAdding(true);
-    setFormError("");
     try {
       const res = await fetch("/api/events", {
         method: "POST",
@@ -94,7 +102,7 @@ export default function CalendarPage() {
       setTitle("");
       setDate("");
     } catch {
-      setFormError("Failed to add event. Please try again.");
+      alert("Failed to add event. Please try again.");
     } finally {
       setAdding(false);
     }
@@ -112,17 +120,14 @@ export default function CalendarPage() {
   }
 
   return (
-    <PageShell>
-      <header className="page-header">
-        <div className="page-header-top">
-          <h1 className="page-title">Calendar</h1>
-        </div>
-        <p className="page-subtitle">Upcoming household events and reminders.</p>
+    <div className="app-wrapper">
+      <header className="app-header">
+        <h1>Calendar</h1>
+        <p>Everything in the household, in one place.</p>
       </header>
 
       {/* Add Event Form */}
       <div className="form-card">
-        {formError && <div className="form-error">{formError}</div>}
         <div className="form-row">
           <div className="form-group">
             <label className="form-label" htmlFor="event-title">Event Title</label>
@@ -149,48 +154,67 @@ export default function CalendarPage() {
             />
           </div>
         </div>
-        <button className="btn btn-primary btn-full" onClick={addEvent} disabled={adding}>
-          {adding ? <SpinnerIcon /> : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-          )}
+        <button
+          className="btn btn-primary btn-full"
+          onClick={addEvent}
+          disabled={adding || !title.trim() || !date}
+        >
+          {adding ? <SpinnerIcon /> : <PlusIcon />}
           {adding ? "Adding…" : "Add Event"}
         </button>
       </div>
 
-      {/* Count */}
-      {!loading && !error && (
-        <div className="list-meta">
-          <span className="section-count">
-            {events.length} event{events.length !== 1 ? "s" : ""}
-          </span>
-        </div>
-      )}
-
       {/* Event List */}
-      {loading ? (
-        <div className="empty-state"><SpinnerIcon /><span style={{ marginTop: 12, display: "block" }}>Loading…</span></div>
-      ) : error ? (
-        <div className="empty-state" style={{ color: "var(--rust)" }}>{error}</div>
-      ) : events.length === 0 ? (
-        <div className="empty-state">
-          <CalIcon />
-          No events yet — add your first one above.
+      <section className="section">
+        <div className="section-header">
+          <div className="section-header-left">
+            <h2 className="section-title">Upcoming Events</h2>
+            {!loading && (
+              <span className="section-count">
+                {events.length} event{events.length !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
         </div>
-      ) : (
-        events.map((event) => {
-          const { month, day, full } = formatDate(event.date);
-          return (
-            <div key={event.id} className="event-card">
-              <div className="event-date-block">
-                <span className="event-date-month">{month}</span>
-                <span className="event-date-day">{day}</span>
+
+        {loading ? (
+          <div className="empty-state">
+            <SpinnerIcon />
+            <span>Loading events…</span>
+          </div>
+        ) : error ? (
+          <div className="empty-state" style={{ color: "var(--rust)" }}>{error}</div>
+        ) : events.length === 0 ? (
+          <div className="empty-state">
+            <CalEmptyIcon />
+            No events yet — add your first one above.
+          </div>
+        ) : (
+          events.map((event) => {
+            const { month, day, full } = formatDate(event.date);
+            return (
+              <div key={event.id} className="event-card">
+                <div className="event-date-block">
+                  <span className="event-date-month">{month}</span>
+                  <span className="event-date-day">{day}</span>
+                </div>
+                <div className="event-info">
+                  <div className="event-title">{event.title}</div>
+                  <div className="event-date-full">{full}</div>
+                </div>
+                <div className="event-remove">
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => removeEvent(event.id)}
+                  >
+                    <TrashIcon />
+                  </button>
+                </div>
               </div>
-              <div className="event-info">
-                <div className="event-title">{event.title}</div>
-                <div className="event-date-full">{full}</div>
-              </div>
-              <div className="event-remove">
-                <button className="btn btn-danger btn-sm" onClick={() => removeEvent(event.id)}>
-                  <TrashIcon
+            );
+          })
+        )}
+      </section>
+    </div>
+  );
+}
