@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const result = await pool.query(
-      `SELECT id, name, category, room, area, spot, created_at, updated_at
+      `SELECT id, name, category, room, area, created_at, updated_at
        FROM inventory_items WHERE id = $1`,
       [params.id]
     );
@@ -27,7 +27,7 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { name, category, room, area, spot } = body;
+    const { name, category, room, area } = body;
 
     if (!name?.trim()) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -35,17 +35,10 @@ export async function PUT(
 
     const result = await pool.query(
       `UPDATE inventory_items
-       SET name = $1, category = $2, room = $3, area = $4, spot = $5, updated_at = NOW()
-       WHERE id = $6
-       RETURNING id, name, category, room, area, spot, created_at, updated_at`,
-      [
-        name.trim(),
-        (category ?? "").trim(),
-        (room ?? "").trim(),
-        (area ?? "").trim(),
-        (spot ?? "").trim(),
-        params.id,
-      ]
+       SET name = $1, category = $2, room = $3, area = $4, updated_at = NOW()
+       WHERE id = $5
+       RETURNING id, name, category, room, area, created_at, updated_at`,
+      [name.trim(), (category ?? "").trim(), (room ?? "").trim(), (area ?? "").trim(), params.id]
     );
 
     if (result.rowCount === 0) {
