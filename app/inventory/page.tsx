@@ -9,73 +9,71 @@ interface InventoryItem {
   category: string;
   room: string;
   area: string;
-  spot: string;
   created_at: string;
   updated_at: string;
 }
 
-/* ── Helpers ── */
 function formatShortDate(iso: string) {
   if (!iso) return "";
-  const d = new Date(iso);
-  return d.toLocaleDateString("en", { day: "numeric", month: "short", year: "numeric" });
+  return new Date(iso).toLocaleDateString("en", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function buildLocationLabel(room: string, area: string, spot: string) {
-  return [room, area, spot].filter(Boolean).join(" → ");
+function buildLocationLabel(room: string, area: string) {
+  return [room, area].filter(Boolean).join(" → ");
 }
 
-/* ── Icons ── */
 function SearchIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
     </svg>
   );
 }
-
 function BoxIcon() {
   return (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
       <path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" />
     </svg>
   );
 }
-
 function EditIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z" />
     </svg>
   );
 }
-
 function TrashIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2" />
     </svg>
   );
 }
-
 function PlusIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
       <path d="M12 5v14M5 12h14" />
     </svg>
   );
 }
-
 function FilterIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
     </svg>
   );
 }
-
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+      style={{ transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
 function SpinnerIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ animation: "spin 0.9s linear infinite" }}>
@@ -84,35 +82,18 @@ function SpinnerIcon() {
   );
 }
 
-function ChevronIcon({ open }: { open: boolean }) {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-      style={{ transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
-
 export default function InventoryPage() {
   const router = useRouter();
 
-  const [items, setItems] = useState<InventoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const [search, setSearch] = useState("");
-  const [filterRoom, setFilterRoom] = useState("All");
+  const [items, setItems]       = useState<InventoryItem[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState("");
+  const [search, setSearch]     = useState("");
+  const [filterRoom, setFilterRoom]         = useState("All");
   const [filterCategory, setFilterCategory] = useState("All");
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters]       = useState(false);
 
-  const [rooms, setRooms] = useState<string[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-
-  useEffect(() => {
-    fetchItems();
-    fetch("/api/rooms").then(r => r.json()).then(d => setRooms(d.map((r: { name: string }) => r.name))).catch(() => {});
-    fetch("/api/categories").then(r => r.json()).then(d => setCategories(d.map((c: { name: string }) => c.name))).catch(() => {});
-  }, []);
+  useEffect(() => { fetchItems(); }, []);
 
   async function fetchItems() {
     setLoading(true);
@@ -130,7 +111,7 @@ export default function InventoryPage() {
 
   async function removeItem(id: number) {
     if (!confirm("Delete this item?")) return;
-    setItems((prev) => prev.filter((i) => i.id !== id));
+    setItems(prev => prev.filter(i => i.id !== id));
     try {
       const res = await fetch(`/api/items/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
@@ -142,30 +123,24 @@ export default function InventoryPage() {
 
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return items.filter((item) => {
-      const matchesSearch =
+    return items.filter(item => {
+      const matchSearch =
         !q ||
         item.name.toLowerCase().includes(q) ||
         item.category.toLowerCase().includes(q) ||
         item.room.toLowerCase().includes(q) ||
-        item.area.toLowerCase().includes(q) ||
-        item.spot.toLowerCase().includes(q);
-      const matchesRoom = filterRoom === "All" || item.room === filterRoom;
-      const matchesCategory = filterCategory === "All" || item.category === filterCategory;
-      return matchesSearch && matchesRoom && matchesCategory;
+        item.area.toLowerCase().includes(q);
+      const matchRoom     = filterRoom === "All"     || item.room === filterRoom;
+      const matchCategory = filterCategory === "All" || item.category === filterCategory;
+      return matchSearch && matchRoom && matchCategory;
     });
   }, [items, search, filterRoom, filterCategory]);
 
-  // Derive rooms and categories that actually appear in the data for filter dropdowns
-  const activeRooms = useMemo(() => {
-    const set = new Set(items.map((i) => i.room).filter(Boolean));
-    return Array.from(set).sort();
-  }, [items]);
+  const activeRooms = useMemo(() =>
+    Array.from(new Set(items.map(i => i.room).filter(Boolean))).sort(), [items]);
 
-  const activeCategories = useMemo(() => {
-    const set = new Set(items.map((i) => i.category).filter(Boolean));
-    return Array.from(set).sort();
-  }, [items]);
+  const activeCategories = useMemo(() =>
+    Array.from(new Set(items.map(i => i.category).filter(Boolean))).sort(), [items]);
 
   const hasActiveFilters = filterRoom !== "All" || filterCategory !== "All";
 
@@ -176,8 +151,8 @@ export default function InventoryPage() {
         <p>Everything in the household, in one place.</p>
       </header>
 
-      {/* Search + Add row */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 12, alignItems: "center" }}>
+      {/* Search + controls row */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "center" }}>
         <div className="search-wrapper" style={{ marginBottom: 0, flex: 1 }}>
           <SearchIcon />
           <input
@@ -189,9 +164,9 @@ export default function InventoryPage() {
           />
         </div>
         <button
-          className={`btn btn-secondary${hasActiveFilters ? " filter-active" : ""}`}
-          onClick={() => setShowFilters((v) => !v)}
-          style={{ flexShrink: 0 }}
+          className={`btn btn-secondary btn-sm${hasActiveFilters ? " filter-active" : ""}`}
+          onClick={() => setShowFilters(v => !v)}
+          style={{ flexShrink: 0, gap: 6 }}
         >
           <FilterIcon />
           Filter
@@ -199,7 +174,7 @@ export default function InventoryPage() {
           <ChevronIcon open={showFilters} />
         </button>
         <button
-          className="btn btn-primary"
+          className="btn btn-primary btn-sm"
           onClick={() => router.push("/inventory/new")}
           style={{ flexShrink: 0 }}
         >
@@ -219,9 +194,7 @@ export default function InventoryPage() {
                 onChange={(e) => setFilterRoom(e.target.value)}
               >
                 <option value="All">All Rooms</option>
-                {activeRooms.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
+                {activeRooms.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
             <div className="form-group">
@@ -232,9 +205,7 @@ export default function InventoryPage() {
                 onChange={(e) => setFilterCategory(e.target.value)}
               >
                 <option value="All">All Categories</option>
-                {activeCategories.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
+                {activeCategories.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             {hasActiveFilters && (
@@ -251,6 +222,7 @@ export default function InventoryPage() {
         </div>
       )}
 
+      {/* List */}
       <section className="section">
         <div className="section-header">
           <div className="section-header-left">
@@ -266,7 +238,7 @@ export default function InventoryPage() {
         {loading ? (
           <div className="empty-state"><SpinnerIcon /><span>Loading inventory…</span></div>
         ) : error ? (
-          <div className="empty-state" style={{ color: "var(--rust)" }}>{error}</div>
+          <div className="empty-state" style={{ color: "#c0392b" }}>{error}</div>
         ) : filteredItems.length === 0 ? (
           <div className="empty-state">
             <BoxIcon />
@@ -275,19 +247,17 @@ export default function InventoryPage() {
               : "No items yet — tap 'Add' to get started."}
           </div>
         ) : (
-          filteredItems.map((item) => (
-            <div key={item.id} className="item-card item-card-rich">
+          filteredItems.map(item => (
+            <div key={item.id} className="item-card">
               <div className="item-info">
                 <div className="item-card-top">
                   <span className="item-name">{item.name}</span>
-                  {item.category && (
-                    <span className="category-tag">{item.category}</span>
-                  )}
+                  {item.category && <span className="category-tag">{item.category}</span>}
                 </div>
-                {(item.room || item.area || item.spot) && (
+                {(item.room || item.area) && (
                   <div className="item-location">
                     <span className="location-tag">
-                      {buildLocationLabel(item.room, item.area, item.spot)}
+                      {buildLocationLabel(item.room, item.area)}
                     </span>
                   </div>
                 )}
@@ -305,10 +275,7 @@ export default function InventoryPage() {
                 >
                   <EditIcon /> Edit
                 </button>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => removeItem(item.id)}
-                >
+                <button className="btn btn-danger btn-sm" onClick={() => removeItem(item.id)}>
                   <TrashIcon />
                 </button>
               </div>
