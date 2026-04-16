@@ -143,7 +143,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
 
           <div className="sidebar-footer">
-            Everything in the household
+            Home Dash by Jake
           </div>
         </nav>
 
