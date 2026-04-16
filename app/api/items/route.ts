@@ -5,7 +5,9 @@ export async function GET() {
   try {
     await initDB();
     const result = await pool.query(
-      "SELECT id, name, location FROM inventory_items ORDER BY created_at ASC"
+      `SELECT id, name, category, room, area, spot, created_at, updated_at
+       FROM inventory_items
+       ORDER BY created_at ASC`
     );
     return NextResponse.json(result.rows);
   } catch (err) {
@@ -18,15 +20,23 @@ export async function POST(request: Request) {
   try {
     await initDB();
     const body = await request.json();
-    const { name, location } = body;
+    const { name, category, room, area, spot } = body;
 
-    if (!name?.trim() || !location?.trim()) {
-      return NextResponse.json({ error: "Name and location are required" }, { status: 400 });
+    if (!name?.trim()) {
+      return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
     const result = await pool.query(
-      "INSERT INTO inventory_items (name, location) VALUES ($1, $2) RETURNING id, name, location",
-      [name.trim(), location.trim()]
+      `INSERT INTO inventory_items (name, category, room, area, spot)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, name, category, room, area, spot, created_at, updated_at`,
+      [
+        name.trim(),
+        (category ?? "").trim(),
+        (room ?? "").trim(),
+        (area ?? "").trim(),
+        (spot ?? "").trim(),
+      ]
     );
     return NextResponse.json(result.rows[0], { status: 201 });
   } catch (err) {
