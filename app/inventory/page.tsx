@@ -6,9 +6,26 @@ import { useRouter } from "next/navigation";
 interface InventoryItem {
   id: number;
   name: string;
-  location: string;
+  category: string;
+  room: string;
+  area: string;
+  spot: string;
+  created_at: string;
+  updated_at: string;
 }
 
+/* ── Helpers ── */
+function formatShortDate(iso: string) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return d.toLocaleDateString("en", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function buildLocationLabel(room: string, area: string, spot: string) {
+  return [room, area, spot].filter(Boolean).join(" → ");
+}
+
+/* ── Icons ── */
 function SearchIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -43,18 +60,18 @@ function TrashIcon() {
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 6 9 17l-5-5" />
-    </svg>
-  );
-}
-
 function PlusIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
       <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+function FilterIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
     </svg>
   );
 }
@@ -67,18 +84,35 @@ function SpinnerIcon() {
   );
 }
 
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+      style={{ transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
 export default function InventoryPage() {
   const router = useRouter();
 
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editLocation, setEditLocation] = useState("");
-  const [editSaving, setEditSaving] = useState(false);
 
-  useEffect(() => { fetchItems(); }, []);
+  const [search, setSearch] = useState("");
+  const [filterRoom, setFilterRoom] = useState("All");
+  const [filterCategory, setFilterCategory] = useState("All");
+  const [showFilters, setShowFilters] = useState(false);
+
+  const [rooms, setRooms] = useState<string[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchItems();
+    fetch("/api/rooms").then(r => r.json()).then(d => setRooms(d.map((r: { name: string }) => r.name))).catch(() => {});
+    fetch("/api/categories").then(r => r.json()).then(d => setCategories(d.map((c: { name: string }) => c.name))).catch(() => {});
+  }, []);
 
   async function fetchItems() {
     setLoading(true);
@@ -95,6 +129,7 @@ export default function InventoryPage() {
   }
 
   async function removeItem(id: number) {
+    if (!confirm("Delete this item?")) return;
     setItems((prev) => prev.filter((i) => i.id !== id));
     try {
       const res = await fetch(`/api/items/${id}`, { method: "DELETE" });
@@ -105,37 +140,34 @@ export default function InventoryPage() {
     }
   }
 
-  function startEdit(item: InventoryItem) {
-    setEditingId(item.id);
-    setEditLocation(item.location);
-  }
-
-  async function saveEdit(id: number) {
-    const location = editLocation.trim();
-    if (!location || editSaving) return;
-    setEditSaving(true);
-    try {
-      const res = await fetch(`/api/items/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ location }),
-      });
-      if (!res.ok) throw new Error();
-      const updated = await res.json();
-      setItems((prev) => prev.map((i) => (i.id === id ? updated : i)));
-      setEditingId(null);
-    } catch {
-      alert("Failed to save. Please try again.");
-    } finally {
-      setEditSaving(false);
-    }
-  }
-
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((i) => i.name.toLowerCase().includes(q));
-  }, [items, search]);
+    return items.filter((item) => {
+      const matchesSearch =
+        !q ||
+        item.name.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q) ||
+        item.room.toLowerCase().includes(q) ||
+        item.area.toLowerCase().includes(q) ||
+        item.spot.toLowerCase().includes(q);
+      const matchesRoom = filterRoom === "All" || item.room === filterRoom;
+      const matchesCategory = filterCategory === "All" || item.category === filterCategory;
+      return matchesSearch && matchesRoom && matchesCategory;
+    });
+  }, [items, search, filterRoom, filterCategory]);
+
+  // Derive rooms and categories that actually appear in the data for filter dropdowns
+  const activeRooms = useMemo(() => {
+    const set = new Set(items.map((i) => i.room).filter(Boolean));
+    return Array.from(set).sort();
+  }, [items]);
+
+  const activeCategories = useMemo(() => {
+    const set = new Set(items.map((i) => i.category).filter(Boolean));
+    return Array.from(set).sort();
+  }, [items]);
+
+  const hasActiveFilters = filterRoom !== "All" || filterCategory !== "All";
 
   return (
     <div className="app-wrapper">
@@ -144,26 +176,80 @@ export default function InventoryPage() {
         <p>Everything in the household, in one place.</p>
       </header>
 
-      {/* Search + Add button row */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 28, alignItems: "center" }}>
+      {/* Search + Add row */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 12, alignItems: "center" }}>
         <div className="search-wrapper" style={{ marginBottom: 0, flex: 1 }}>
           <SearchIcon />
           <input
             className="search-input"
             type="search"
-            placeholder="Search by name…"
+            placeholder="Search name, category, location…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <button
+          className={`btn btn-secondary${hasActiveFilters ? " filter-active" : ""}`}
+          onClick={() => setShowFilters((v) => !v)}
+          style={{ flexShrink: 0 }}
+        >
+          <FilterIcon />
+          Filter
+          {hasActiveFilters && <span className="filter-badge" />}
+          <ChevronIcon open={showFilters} />
+        </button>
+        <button
           className="btn btn-primary"
           onClick={() => router.push("/inventory/new")}
           style={{ flexShrink: 0 }}
         >
-          <PlusIcon /> Add Item
+          <PlusIcon /> Add
         </button>
       </div>
+
+      {/* Filter panel */}
+      {showFilters && (
+        <div className="filter-panel">
+          <div className="filter-row">
+            <div className="form-group">
+              <label className="form-label">Room</label>
+              <select
+                className="form-input form-select"
+                value={filterRoom}
+                onChange={(e) => setFilterRoom(e.target.value)}
+              >
+                <option value="All">All Rooms</option>
+                {activeRooms.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Category</label>
+              <select
+                className="form-input form-select"
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+              >
+                <option value="All">All Categories</option>
+                {activeCategories.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            {hasActiveFilters && (
+              <div style={{ display: "flex", alignItems: "flex-end" }}>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => { setFilterRoom("All"); setFilterCategory("All"); }}
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <section className="section">
         <div className="section-header">
@@ -178,72 +264,54 @@ export default function InventoryPage() {
         </div>
 
         {loading ? (
-          <div className="empty-state">
-            <SpinnerIcon />
-            <span>Loading inventory…</span>
-          </div>
+          <div className="empty-state"><SpinnerIcon /><span>Loading inventory…</span></div>
         ) : error ? (
           <div className="empty-state" style={{ color: "var(--rust)" }}>{error}</div>
         ) : filteredItems.length === 0 ? (
           <div className="empty-state">
             <BoxIcon />
-            {search
-              ? `No items matching "${search}"`
-              : "No items yet — tap 'Add Item' to get started."}
+            {search || hasActiveFilters
+              ? "No items match your search or filters."
+              : "No items yet — tap 'Add' to get started."}
           </div>
         ) : (
           filteredItems.map((item) => (
-            <div key={item.id} className="item-card">
+            <div key={item.id} className="item-card item-card-rich">
               <div className="item-info">
-                <div className="item-name">{item.name}</div>
-                {editingId === item.id ? (
-                  <div className="edit-row">
-                    <input
-                      className="form-input"
-                      type="text"
-                      value={editLocation}
-                      onChange={(e) => setEditLocation(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") saveEdit(item.id);
-                        if (e.key === "Escape") setEditingId(null);
-                      }}
-                      autoFocus
-                      placeholder="New location"
-                      disabled={editSaving}
-                      style={{ maxWidth: 220 }}
-                    />
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={() => saveEdit(item.id)}
-                      disabled={editSaving}
-                    >
-                      {editSaving ? <SpinnerIcon /> : <CheckIcon />}
-                      {editSaving ? "Saving…" : "Save"}
-                    </button>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => setEditingId(null)}
-                      disabled={editSaving}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
+                <div className="item-card-top">
+                  <span className="item-name">{item.name}</span>
+                  {item.category && (
+                    <span className="category-tag">{item.category}</span>
+                  )}
+                </div>
+                {(item.room || item.area || item.spot) && (
                   <div className="item-location">
-                    <span className="location-tag">{item.location}</span>
+                    <span className="location-tag">
+                      {buildLocationLabel(item.room, item.area, item.spot)}
+                    </span>
                   </div>
                 )}
-              </div>
-              {editingId !== item.id && (
-                <div className="item-actions">
-                  <button className="btn btn-secondary btn-sm" onClick={() => startEdit(item)}>
-                    <EditIcon /> Edit
-                  </button>
-                  <button className="btn btn-danger btn-sm" onClick={() => removeItem(item.id)}>
-                    <TrashIcon />
-                  </button>
+                <div className="item-dates">
+                  <span>Added {formatShortDate(item.created_at)}</span>
+                  {item.updated_at && item.updated_at !== item.created_at && (
+                    <span>· Updated {formatShortDate(item.updated_at)}</span>
+                  )}
                 </div>
-              )}
+              </div>
+              <div className="item-actions">
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => router.push(`/inventory/${item.id}/edit`)}
+                >
+                  <EditIcon /> Edit
+                </button>
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => removeItem(item.id)}
+                >
+                  <TrashIcon />
+                </button>
+              </div>
             </div>
           ))
         )}
