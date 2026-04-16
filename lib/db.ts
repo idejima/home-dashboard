@@ -6,66 +6,65 @@ const pool = new Pool({
 });
 
 export async function initDB() {
-  // Rooms lookup table
   await pool.query(`
     CREATE TABLE IF NOT EXISTS rooms (
-      id         SERIAL PRIMARY KEY,
-      name       TEXT NOT NULL UNIQUE
+      id   SERIAL PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE
     );
   `);
 
-  // Seed default rooms if empty
   await pool.query(`
-    INSERT INTO rooms (name)
-    VALUES
+    INSERT INTO rooms (name) VALUES
       ('Living Room'), ('Kitchen'), ('Master Bedroom'),
-      ('Bedroom'), ('Bathroom'), ('Storeroom'),
-      ('Garage'), ('Study'), ('Dining Room'), ('Balcony')
+      ('Bedroom 1'), ('Bedroom 2'), ('Storeroom'),
+      ('Study'), ('Balcony')
     ON CONFLICT (name) DO NOTHING;
   `);
 
-  // Categories lookup table
   await pool.query(`
     CREATE TABLE IF NOT EXISTS categories (
-      id         SERIAL PRIMARY KEY,
-      name       TEXT NOT NULL UNIQUE
+      id   SERIAL PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE
     );
   `);
 
-  // Seed default categories if empty
   await pool.query(`
-    INSERT INTO categories (name)
-    VALUES
+    INSERT INTO categories (name) VALUES
       ('Electronics'), ('Tools'), ('Clothes'), ('Food & Drinks'),
       ('Cleaning'), ('Medicine'), ('Documents'), ('Toys'),
       ('Sports'), ('Books'), ('Kitchen'), ('Miscellaneous')
     ON CONFLICT (name) DO NOTHING;
   `);
 
-  // Inventory items — create with new schema if not exists
   await pool.query(`
     CREATE TABLE IF NOT EXISTS inventory_items (
-      id          SERIAL PRIMARY KEY,
-      name        TEXT NOT NULL,
-      category    TEXT NOT NULL DEFAULT '',
-      room        TEXT NOT NULL DEFAULT '',
-      area        TEXT NOT NULL DEFAULT '',
-      spot        TEXT NOT NULL DEFAULT '',
-      created_at  TIMESTAMPTZ DEFAULT NOW(),
-      updated_at  TIMESTAMPTZ DEFAULT NOW()
+      id         SERIAL PRIMARY KEY,
+      name       TEXT NOT NULL,
+      category   TEXT NOT NULL DEFAULT '',
+      room       TEXT NOT NULL DEFAULT '',
+      area       TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
     );
   `);
 
-  // Migrate: add new columns if the table already existed with old schema
-  const cols = ['category', 'room', 'area', 'spot', 'updated_at'];
-  for (const col of cols) {
+  // Safe migrations for existing tables
+  const cols: [string, string][] = [
+    ['category',   "TEXT NOT NULL DEFAULT ''"],
+    ['room',       "TEXT NOT NULL DEFAULT ''"],
+    ['area',       "TEXT NOT NULL DEFAULT ''"],
+    ['updated_at', 'TIMESTAMPTZ DEFAULT NOW()'],
+  ];
+  for (const [col, def] of cols) {
     await pool.query(`
-      ALTER TABLE inventory_items
-      ADD COLUMN IF NOT EXISTS ${col} ${
-        col === 'updated_at' ? 'TIMESTAMPTZ DEFAULT NOW()' : 'TEXT NOT NULL DEFAULT \'\''
-      };
+      ALTER TABLE inventory_items ADD COLUMN IF NOT EXISTS ${col} ${def};
     `);
   }
+
+  // Drop spot column if it exists from a previous version
+  await pool.query(`
+    ALTER TABLE inventory_items DROP COLUMN IF EXISTS spot;
+  `);
 }
 
 export default pool;
