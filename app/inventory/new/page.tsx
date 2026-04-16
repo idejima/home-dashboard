@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 function SpinnerIcon() {
@@ -27,26 +27,87 @@ function BackIcon() {
   );
 }
 
+interface Option { id: number; name: string; }
+
 export default function NewInventoryPage() {
   const router = useRouter();
+
   const [name, setName] = useState("");
-  const [location, setLocation] = useState("");
+  const [category, setCategory] = useState("");
+  const [room, setRoom] = useState("");
+  const [area, setArea] = useState("");
+  const [spot, setSpot] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  const [rooms, setRooms] = useState<Option[]>([]);
+  const [categories, setCategories] = useState<Option[]>([]);
+  const [newRoom, setNewRoom] = useState("");
+  const [newCategory, setNewCategory] = useState("");
+  const [addingRoom, setAddingRoom] = useState(false);
+  const [addingCategory, setAddingCategory] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/rooms").then(r => r.json()).then(setRooms).catch(() => {});
+    fetch("/api/categories").then(r => r.json()).then(setCategories).catch(() => {});
+  }, []);
+
+  async function handleAddRoom() {
+    const trimmed = newRoom.trim();
+    if (!trimmed) return;
+    setAddingRoom(true);
+    try {
+      const res = await fetch("/api/rooms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: trimmed }),
+      });
+      const added = await res.json();
+      setRooms((prev) => {
+        const exists = prev.find((r) => r.id === added.id);
+        return exists ? prev : [...prev, added].sort((a, b) => a.name.localeCompare(b.name));
+      });
+      setRoom(added.name);
+      setNewRoom("");
+    } catch { /* silent */ } finally {
+      setAddingRoom(false);
+    }
+  }
+
+  async function handleAddCategory() {
+    const trimmed = newCategory.trim();
+    if (!trimmed) return;
+    setAddingCategory(true);
+    try {
+      const res = await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: trimmed }),
+      });
+      const added = await res.json();
+      setCategories((prev) => {
+        const exists = prev.find((c) => c.id === added.id);
+        return exists ? prev : [...prev, added].sort((a, b) => a.name.localeCompare(b.name));
+      });
+      setCategory(added.name);
+      setNewCategory("");
+    } catch { /* silent */ } finally {
+      setAddingCategory(false);
+    }
+  }
+
   async function handleSubmit() {
     const trimName = name.trim();
-    const trimLocation = location.trim();
-    if (!trimName || !trimLocation || saving) return;
+    if (!trimName || saving) return;
     setError("");
     setSaving(true);
     try {
       const res = await fetch("/api/items", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: trimName, location: trimLocation }),
+        body: JSON.stringify({ name: trimName, category, room, area, spot }),
       });
-      if (!res.ok) throw new Error("Failed to add item");
+      if (!res.ok) throw new Error();
       router.push("/inventory");
     } catch {
       setError("Something went wrong. Please try again.");
@@ -62,42 +123,141 @@ export default function NewInventoryPage() {
       </header>
 
       <div className="page-back">
-        <button
-          className="btn btn-secondary btn-sm"
-          onClick={() => router.push("/inventory")}
-        >
+        <button className="btn btn-secondary btn-sm" onClick={() => router.push("/inventory")}>
           <BackIcon /> Back to Inventory
         </button>
       </div>
 
-      <div className="form-card" style={{ maxWidth: 480 }}>
-        <div className="form-group" style={{ marginBottom: 16 }}>
-          <label className="form-label" htmlFor="item-name">Item Name</label>
+      <div className="form-card structured-form">
+
+        {/* Name */}
+        <div className="form-group">
+          <label className="form-label" htmlFor="item-name">Item Name <span className="required">*</span></label>
           <input
             id="item-name"
             className="form-input"
             type="text"
-            placeholder="e.g. Spare batteries"
+            placeholder="e.g. Extension cord"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             disabled={saving}
             autoFocus
           />
         </div>
-        <div className="form-group" style={{ marginBottom: 4 }}>
-          <label className="form-label" htmlFor="item-location">Storage Location</label>
+
+        <div className="form-divider" />
+
+        {/* Category */}
+        <div className="form-section-label">Category</div>
+        <div className="form-group">
+          <label className="form-label" htmlFor="category">Select Category</label>
+          <select
+            id="category"
+            className="form-input form-select"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            disabled={saving}
+          >
+            <option value="">— None —</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.name}>{c.name}</option>
+            ))}
+          </select>
+        </div>
+        <div className="inline-add-row">
           <input
-            id="item-location"
             className="form-input"
             type="text"
-            placeholder="e.g. Kitchen drawer"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            disabled={saving}
+            placeholder="Add new category…"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAddCategory()}
+            disabled={addingCategory || saving}
           />
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={handleAddCategory}
+            disabled={!newCategory.trim() || addingCategory}
+          >
+            {addingCategory ? <SpinnerIcon /> : "+ Add"}
+          </button>
         </div>
+
+        <div className="form-divider" />
+
+        {/* Location */}
+        <div className="form-section-label">Location</div>
+
+        <div className="form-group">
+          <label className="form-label" htmlFor="room">Room</label>
+          <select
+            id="room"
+            className="form-input form-select"
+            value={room}
+            onChange={(e) => setRoom(e.target.value)}
+            disabled={saving}
+          >
+            <option value="">— Select Room —</option>
+            {rooms.map((r) => (
+              <option key={r.id} value={r.name}>{r.name}</option>
+            ))}
+          </select>
+        </div>
+        <div className="inline-add-row">
+          <input
+            className="form-input"
+            type="text"
+            placeholder="Add new room…"
+            value={newRoom}
+            onChange={(e) => setNewRoom(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAddRoom()}
+            disabled={addingRoom || saving}
+          />
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={handleAddRoom}
+            disabled={!newRoom.trim() || addingRoom}
+          >
+            {addingRoom ? <SpinnerIcon /> : "+ Add"}
+          </button>
+        </div>
+
+        <div className="form-row" style={{ marginTop: 14 }}>
+          <div className="form-group">
+            <label className="form-label" htmlFor="area">Area</label>
+            <input
+              id="area"
+              className="form-input"
+              type="text"
+              placeholder="e.g. TV Console"
+              value={area}
+              onChange={(e) => setArea(e.target.value)}
+              disabled={saving}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="spot">Spot</label>
+            <input
+              id="spot"
+              className="form-input"
+              type="text"
+              placeholder="e.g. Bottom Drawer"
+              value={spot}
+              onChange={(e) => setSpot(e.target.value)}
+              disabled={saving}
+            />
+          </div>
+        </div>
+
+        {/* Location preview */}
+        {(room || area || spot) && (
+          <div className="location-preview">
+            <span className="location-preview-label">Location:</span>
+            <span className="location-tag">
+              {[room, area, spot].filter(Boolean).join(" → ")}
+            </span>
+          </div>
+        )}
 
         {error && (
           <p style={{ color: "var(--rust)", fontSize: "0.85rem", marginTop: 12 }}>{error}</p>
@@ -106,7 +266,7 @@ export default function NewInventoryPage() {
         <button
           className="btn btn-primary btn-full"
           onClick={handleSubmit}
-          disabled={saving || !name.trim() || !location.trim()}
+          disabled={saving || !name.trim()}
         >
           {saving ? <SpinnerIcon /> : <PlusIcon />}
           {saving ? "Saving…" : "Add Item"}
