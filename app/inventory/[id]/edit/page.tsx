@@ -236,7 +236,6 @@ export default function EditInventoryPage() {
       <div className="app-wrapper">
         <header className="app-header">
           <h1>Edit Item</h1>
-          <p>Everything in the household, in one place.</p>
         </header>
 
         <div className="page-back">
