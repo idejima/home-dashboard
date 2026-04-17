@@ -11,22 +11,6 @@ function ArrowIcon() {
   );
 }
 
-function BoxBgIcon() {
-  return (
-    <svg width="110" height="110" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="jumbo-card-bg">
-      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-    </svg>
-  );
-}
-
-function CalBgIcon() {
-  return (
-    <svg width="110" height="110" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="jumbo-card-bg">
-      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-    </svg>
-  );
-}
-
 export default function HomePage() {
   const router = useRouter();
   const [itemCount, setItemCount]   = useState<number | null>(null);
@@ -51,6 +35,7 @@ export default function HomePage() {
       </header>
 
       <div className="jumbo-grid">
+        {/* Inventory card */}
         <div
           className="jumbo-card"
           onClick={() => router.push("/inventory")}
@@ -58,16 +43,38 @@ export default function HomePage() {
           tabIndex={0}
           onKeyDown={(e) => e.key === "Enter" && router.push("/inventory")}
         >
-          <div>
+          {/* Decorative bg shape — purely visual, behind everything */}
+          <svg
+            aria-hidden="true"
+            width="130" height="130"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            stroke="none"
+            style={{
+              position: "absolute",
+              bottom: -16, right: -16,
+              color: "var(--blue)",
+              opacity: 0.06,
+              pointerEvents: "none",
+              zIndex: 0,
+            }}
+          >
+            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+          </svg>
+
+          <div style={{ position: "relative", zIndex: 1 }}>
             <div className="jumbo-label">Inventory</div>
             <div className="jumbo-count">{itemCount === null ? "—" : itemCount}</div>
             <div className="jumbo-count-label">
               {itemCount === 1 ? "item tracked" : "items tracked"}
             </div>
           </div>
-          <div className="jumbo-arrow"><ArrowIcon /></div>
+          <div className="jumbo-arrow" style={{ position: "relative", zIndex: 1 }}>
+            <ArrowIcon />
+          </div>
         </div>
 
+        {/* Calendar card */}
         <div
           className="jumbo-card"
           onClick={() => router.push("/calendar")}
@@ -75,14 +82,35 @@ export default function HomePage() {
           tabIndex={0}
           onKeyDown={(e) => e.key === "Enter" && router.push("/calendar")}
         >
-          <div>
+          <svg
+            aria-hidden="true"
+            width="130" height="130"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            stroke="none"
+            style={{
+              position: "absolute",
+              bottom: -16, right: -16,
+              color: "var(--blue)",
+              opacity: 0.06,
+              pointerEvents: "none",
+              zIndex: 0,
+            }}
+          >
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+            <rect x="3" y="10" width="18" height="12" rx="0" />
+          </svg>
+
+          <div style={{ position: "relative", zIndex: 1 }}>
             <div className="jumbo-label">Calendar</div>
             <div className="jumbo-count">{eventCount === null ? "—" : eventCount}</div>
             <div className="jumbo-count-label">
               {eventCount === 1 ? "event scheduled" : "events scheduled"}
             </div>
           </div>
-          <div className="jumbo-arrow"><ArrowIcon /></div>
+          <div className="jumbo-arrow" style={{ position: "relative", zIndex: 1 }}>
+            <ArrowIcon />
+          </div>
         </div>
       </div>
     </div>
