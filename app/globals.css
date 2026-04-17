@@ -22,6 +22,12 @@
   --sage:          #5a7a65;
   --sage-light:    #7aa88a;
 
+  --accent-1: #334eac; /* blue */
+  --accent-2: #ac6f33; /* amber */
+  --accent-3: #5a7a65; /* sage */
+  --accent-4: #7a5aac; /* muted purple */
+  --accent-5: #ac335f; /* muted rose */
+
   --shadow-sm:  0 1px 4px rgba(51,78,172,0.06);
   --shadow-md:  0 4px 16px rgba(51,78,172,0.10);
   --shadow-lg:  0 8px 32px rgba(51,78,172,0.14);
@@ -33,6 +39,7 @@
   --font-body:    'DM Sans', system-ui, sans-serif;
   --sidebar-width: 264px;
 }
+
 
 html { font-size: 16px; -webkit-font-smoothing: antialiased; }
 
@@ -204,7 +211,6 @@ body {
   margin-top: 4px;
 }
 
-/* Both cards identical — no filled colour difference */
 .jumbo-card {
   position: relative;
   display: flex;
@@ -213,7 +219,10 @@ body {
   padding: 28px 24px 22px;
   border-radius: var(--radius-lg);
   border: 1.5px solid var(--border);
-  border-top: 4px solid var(--blue);
+
+  /* default fallback */
+  border-top: 4px solid var(--accent-1);
+
   background: var(--warm-white);
   cursor: pointer;
   color: inherit;
@@ -222,6 +231,19 @@ body {
   min-height: 196px;
   overflow: hidden;
 }
+
+.jumbo-card:nth-child(5n + 1) { border-top-color: var(--accent-1); }
+.jumbo-card:nth-child(5n + 2) { border-top-color: var(--accent-2); }
+.jumbo-card:nth-child(5n + 3) { border-top-color: var(--accent-3); }
+.jumbo-card:nth-child(5n + 4) { border-top-color: var(--accent-4); }
+.jumbo-card:nth-child(5n + 5) { border-top-color: var(--accent-5); }
+
+.jumbo-card:nth-child(5n + 1) .jumbo-arrow { border-color: var(--accent-1); }
+.jumbo-card:nth-child(5n + 2) .jumbo-arrow { border-color: var(--accent-2); }
+.jumbo-card:nth-child(5n + 3) .jumbo-arrow { border-color: var(--accent-3); }
+.jumbo-card:nth-child(5n + 4) .jumbo-arrow { border-color: var(--accent-4); }
+.jumbo-card:nth-child(5n + 5) .jumbo-arrow { border-color: var(--accent-5); }
+
 .jumbo-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
