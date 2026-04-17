@@ -3,6 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+function ArrowIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14M12 5l7 7-7 7" />
+    </svg>
+  );
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [itemCount, setItemCount]   = useState<number | null>(null);
@@ -42,7 +50,9 @@ export default function HomePage() {
               {itemCount === 1 ? "item tracked" : "items tracked"}
             </div>
           </div>
-          <div className="jumbo-arrow" style={{ position: "relative", zIndex: 1 }}/>
+          <div className="jumbo-arrow" style={{ position: "relative", zIndex: 1 }}>
+            <ArrowIcon />
+          </div>
         </div>
 
         {/* Calendar card */}
@@ -60,7 +70,9 @@ export default function HomePage() {
               {eventCount === 1 ? "event scheduled" : "events scheduled"}
             </div>
           </div>
-          <div className="jumbo-arrow" style={{ position: "relative", zIndex: 1 }}/>
+          <div className="jumbo-arrow" style={{ position: "relative", zIndex: 1 }}>
+            <ArrowIcon />
+          </div>
         </div>
       </div>
     </div>
