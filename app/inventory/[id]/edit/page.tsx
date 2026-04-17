@@ -51,22 +51,6 @@ function PlusIcon() {
     </svg>
   );
 }
-function TagIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l7.3-7.3a1 1 0 0 0 0-1.41L12 2z" />
-      <circle cx="7" cy="7" r="1.5" fill="currentColor" stroke="none"/>
-    </svg>
-  );
-}
-function MapPinIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
-}
 
 function formatShortDate(iso: string) {
   if (!iso) return "";
@@ -130,10 +114,10 @@ export default function EditInventoryPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const [name, setName]         = useState("");
-  const [category, setCategory] = useState("");
-  const [room, setRoom]         = useState("");
-  const [area, setArea]         = useState("");
+  const [name, setName]           = useState("");
+  const [category, setCategory]   = useState("");
+  const [room, setRoom]           = useState("");
+  const [area, setArea]           = useState("");
   const [createdAt, setCreatedAt] = useState("");
   const [updatedAt, setUpdatedAt] = useState("");
 
@@ -272,7 +256,7 @@ export default function EditInventoryPage() {
 
         <div className="form-card structured-form">
 
-          {/* Name */}
+          {/* Item Name */}
           <div className="form-group">
             <label className="form-label" htmlFor="item-name">
               Item Name <span className="required">*</span>
@@ -288,75 +272,69 @@ export default function EditInventoryPage() {
             />
           </div>
 
-          {/* Category section */}
-          <div className="form-section">
-            <div className="form-section-title"><TagIcon /> Category</div>
-            <div className="form-group">
-              <label className="form-label" htmlFor="category">Select Category</label>
-              <select
-                id="category"
-                className="form-input form-select"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                disabled={saving}
-              >
-                <option value="">— None —</option>
-                {categories.map(c => (
-                  <option key={c.id} value={c.name}>{c.name}</option>
-                ))}
-              </select>
+          <div className="form-divider" />
+
+          {/* Category */}
+          <div className="form-group">
+            <div className="field-group-header">
+              <label className="form-label" htmlFor="category">Category</label>
+              <button className="add-new-trigger" onClick={() => setModal("category")} type="button">
+                <PlusIcon /> Add new
+              </button>
             </div>
-            <button className="add-new-trigger" onClick={() => setModal("category")} type="button">
-              <PlusIcon /> Add new category
-            </button>
+            <select
+              id="category"
+              className="form-input form-select"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              disabled={saving}
+            >
+              <option value="">— None —</option>
+              {categories.map(c => (
+                <option key={c.id} value={c.name}>{c.name}</option>
+              ))}
+            </select>
           </div>
 
-          {/* Location section */}
-          <div className="form-section">
-            <div className="form-section-title"><MapPinIcon /> Location</div>
+          <div className="form-divider" />
 
-            <div className="form-group">
+          {/* Room */}
+          <div className="form-group">
+            <div className="field-group-header">
               <label className="form-label" htmlFor="room">Room</label>
-              <select
-                id="room"
-                className="form-input form-select"
-                value={room}
-                onChange={(e) => setRoom(e.target.value)}
-                disabled={saving}
-              >
-                <option value="">— Select Room —</option>
-                {rooms.map(r => (
-                  <option key={r.id} value={r.name}>{r.name}</option>
-                ))}
-              </select>
+              <button className="add-new-trigger" onClick={() => setModal("room")} type="button">
+                <PlusIcon /> Add new
+              </button>
             </div>
-            <button className="add-new-trigger" onClick={() => setModal("room")} type="button">
-              <PlusIcon /> Add new room
-            </button>
+            <select
+              id="room"
+              className="form-input form-select"
+              value={room}
+              onChange={(e) => setRoom(e.target.value)}
+              disabled={saving}
+            >
+              <option value="">— Select Room —</option>
+              {rooms.map(r => (
+                <option key={r.id} value={r.name}>{r.name}</option>
+              ))}
+            </select>
+          </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="area">
-                Area <span style={{ fontWeight: 400, color: "var(--ink-muted)", fontSize: "0.78rem" }}>(optional)</span>
-              </label>
-              <input
-                id="area"
-                className="form-input"
-                type="text"
-                placeholder="e.g. TV Console"
-                value={area}
-                onChange={(e) => setArea(e.target.value)}
-                disabled={saving}
-              />
-            </div>
-
-            {(room || area) && (
-              <div className="location-preview">
-                <span className="location-preview-label">Preview</span>
-                <span className="location-tag">
-                  {[room, area].filter(Boolean).join(" → ")}
-                </span>
-              </div>
-            )}
+          {/* Area */}
+          <div className="form-group">
+            <label className="form-label" htmlFor="area">
+              Area
+              <span className="form-label-hint">(optional — e.g. TV Console)</span>
+            </label>
+            <input
+              id="area"
+              className="form-input"
+              type="text"
+              placeholder="e.g. TV Console"
+              value={area}
+              onChange={(e) => setArea(e.target.value)}
+              disabled={saving}
+            />
           </div>
 
           {error && (
