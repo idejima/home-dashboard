@@ -85,10 +85,10 @@ function SpinnerIcon() {
 export default function InventoryPage() {
   const router = useRouter();
 
-  const [items, setItems]       = useState<InventoryItem[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState("");
-  const [search, setSearch]     = useState("");
+  const [items, setItems]     = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState("");
+  const [search, setSearch]   = useState("");
   const [filterRoom, setFilterRoom]         = useState("All");
   const [filterCategory, setFilterCategory] = useState("All");
   const [showFilters, setShowFilters]       = useState(false);
@@ -144,6 +144,9 @@ export default function InventoryPage() {
 
   const hasActiveFilters = filterRoom !== "All" || filterCategory !== "All";
 
+  // 2-column grid only when 2+ results
+  const useGrid = filteredItems.length >= 2;
+
   return (
     <div className="app-wrapper">
       <header className="app-header">
@@ -151,7 +154,7 @@ export default function InventoryPage() {
         <p>Everything in the household, in one place.</p>
       </header>
 
-      {/* Search + controls row */}
+      {/* Search + controls */}
       <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "center" }}>
         <div className="search-wrapper" style={{ marginBottom: 0, flex: 1 }}>
           <SearchIcon />
@@ -247,40 +250,42 @@ export default function InventoryPage() {
               : "No items yet — tap 'Add' to get started."}
           </div>
         ) : (
-          filteredItems.map(item => (
-            <div key={item.id} className="item-card">
-              <div className="item-info">
-                <div className="item-card-top">
-                  <span className="item-name">{item.name}</span>
-                  {item.category && <span className="category-tag">{item.category}</span>}
-                </div>
-                {(item.room || item.area) && (
-                  <div className="item-location">
-                    <span className="location-tag">
-                      {buildLocationLabel(item.room, item.area)}
-                    </span>
+          <div className={useGrid ? "item-grid" : undefined}>
+            {filteredItems.map(item => (
+              <div key={item.id} className="item-card">
+                <div className="item-info">
+                  <div className="item-card-top">
+                    <span className="item-name">{item.name}</span>
+                    {item.category && <span className="category-tag">{item.category}</span>}
                   </div>
-                )}
-                <div className="item-dates">
-                  <span>Added {formatShortDate(item.created_at)}</span>
-                  {item.updated_at && item.updated_at !== item.created_at && (
-                    <span>· Updated {formatShortDate(item.updated_at)}</span>
+                  {(item.room || item.area) && (
+                    <div className="item-location">
+                      <span className="location-tag">
+                        {buildLocationLabel(item.room, item.area)}
+                      </span>
+                    </div>
                   )}
+                  <div className="item-dates">
+                    <span>Added {formatShortDate(item.created_at)}</span>
+                    {item.updated_at && item.updated_at !== item.created_at && (
+                      <span>· Updated {formatShortDate(item.updated_at)}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="item-actions">
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => router.push(`/inventory/${item.id}/edit`)}
+                  >
+                    <EditIcon /> Edit
+                  </button>
+                  <button className="btn btn-danger btn-sm" onClick={() => removeItem(item.id)}>
+                    <TrashIcon />
+                  </button>
                 </div>
               </div>
-              <div className="item-actions">
-                <button
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => router.push(`/inventory/${item.id}/edit`)}
-                >
-                  <EditIcon /> Edit
-                </button>
-                <button className="btn btn-danger btn-sm" onClick={() => removeItem(item.id)}>
-                  <TrashIcon />
-                </button>
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </section>
     </div>
