@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import "./globals.css";
 
-/* ── Icons ── */
 function HamburgerIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -14,7 +13,6 @@ function HamburgerIcon() {
     </svg>
   );
 }
-
 function CloseIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -22,7 +20,6 @@ function CloseIcon() {
     </svg>
   );
 }
-
 function HomeIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -31,7 +28,6 @@ function HomeIcon() {
     </svg>
   );
 }
-
 function BoxIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -40,7 +36,6 @@ function BoxIcon() {
     </svg>
   );
 }
-
 function PlusBoxIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -49,7 +44,6 @@ function PlusBoxIcon() {
     </svg>
   );
 }
-
 function CalIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -60,13 +54,24 @@ function CalIcon() {
     </svg>
   );
 }
+function SettingsIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  );
+}
 
-/* ── Nav items ── */
 const NAV = [
-  { label: "Home",             href: "/",              Icon: HomeIcon },
-  { label: "Inventory",        href: "/inventory",     Icon: BoxIcon },
-  { label: "Add Inventory",    href: "/inventory/new", Icon: PlusBoxIcon },
-  { label: "Calendar",         href: "/calendar",      Icon: CalIcon },
+  { label: "Home",          href: "/",              Icon: HomeIcon },
+  { label: "Inventory",     href: "/inventory",     Icon: BoxIcon },
+  { label: "Add Inventory", href: "/inventory/new", Icon: PlusBoxIcon },
+  { label: "Calendar",      href: "/calendar",      Icon: CalIcon },
+];
+
+const NAV_BOTTOM = [
+  { label: "Manage Lists",  href: "/admin",         Icon: SettingsIcon },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -74,10 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const router = useRouter();
 
-  // Close sidebar on route change
   useEffect(() => { setOpen(false); }, [pathname]);
-
-  // Prevent body scroll when sidebar open
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -101,30 +103,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <title>Home Dashboard</title>
       </head>
       <body>
-        {/* Hamburger trigger */}
-        <button
-          className="hamburger"
-          onClick={() => setOpen(true)}
-          aria-label="Open menu"
-        >
+        <button className="hamburger" onClick={() => setOpen(true)} aria-label="Open menu">
           <HamburgerIcon />
         </button>
 
-        {/* Overlay */}
-        <div
-          className={`sidebar-overlay${open ? " open" : ""}`}
-          onClick={() => setOpen(false)}
-        />
+        <div className={`sidebar-overlay${open ? " open" : ""}`} onClick={() => setOpen(false)} />
 
-        {/* Sidebar */}
         <nav className={`sidebar${open ? " open" : ""}`}>
           <div className="sidebar-top">
             <span className="sidebar-logo">Home Dashboard</span>
-            <button
-              className="sidebar-close"
-              onClick={() => setOpen(false)}
-              aria-label="Close menu"
-            >
+            <button className="sidebar-close" onClick={() => setOpen(false)} aria-label="Close menu">
               <CloseIcon />
             </button>
           </div>
@@ -136,15 +124,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 className={`sidebar-link${pathname === href ? " active" : ""}`}
                 onClick={() => navigate(href)}
               >
-                <Icon />
-                {label}
+                <Icon />{label}
               </button>
             ))}
           </div>
 
-          <div className="sidebar-footer">
-            Home Dash by Jake
+          {/* Bottom section — operator links */}
+          <div className="sidebar-bottom-nav">
+            <div className="sidebar-bottom-label">Operator</div>
+            {NAV_BOTTOM.map(({ label, href, Icon }) => (
+              <button
+                key={href}
+                className={`sidebar-link sidebar-link-muted${pathname === href ? " active" : ""}`}
+                onClick={() => navigate(href)}
+              >
+                <Icon />{label}
+              </button>
+            ))}
           </div>
+
+          <div className="sidebar-footer">Home Dash by Jake</div>
         </nav>
 
         {children}
