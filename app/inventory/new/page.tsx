@@ -175,7 +175,6 @@ export default function NewInventoryPage() {
       <div className="app-wrapper">
         <header className="app-header">
           <h1>Add Item</h1>
-          <p>Everything in the household, in one place.</p>
         </header>
 
         <div className="page-back">
