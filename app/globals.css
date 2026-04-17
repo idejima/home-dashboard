@@ -232,17 +232,11 @@ body {
   overflow: hidden;
 }
 
-.jumbo-card:nth-child(5n + 1) { border-top-color: var(--accent-1); }
-.jumbo-card:nth-child(5n + 2) { border-top-color: var(--accent-2); }
-.jumbo-card:nth-child(5n + 3) { border-top-color: var(--accent-3); }
-.jumbo-card:nth-child(5n + 4) { border-top-color: var(--accent-4); }
-.jumbo-card:nth-child(5n + 5) { border-top-color: var(--accent-5); }
-
-.jumbo-card:nth-child(5n + 1) .jumbo-arrow { border-color: var(--accent-1); }
-.jumbo-card:nth-child(5n + 2) .jumbo-arrow { border-color: var(--accent-2); }
-.jumbo-card:nth-child(5n + 3) .jumbo-arrow { border-color: var(--accent-3); }
-.jumbo-card:nth-child(5n + 4) .jumbo-arrow { border-color: var(--accent-4); }
-.jumbo-card:nth-child(5n + 5) .jumbo-arrow { border-color: var(--accent-5); }
+.jumbo-card:nth-child(5n + 1) { --card-accent: var(--accent-1); }
+.jumbo-card:nth-child(5n + 2) { --card-accent: var(--accent-2); }
+.jumbo-card:nth-child(5n + 3) { --card-accent: var(--accent-3); }
+.jumbo-card:nth-child(5n + 4) { --card-accent: var(--accent-4); }
+.jumbo-card:nth-child(5n + 5) { --card-accent: var(--accent-5); }
 
 .jumbo-card:hover {
   transform: translateY(-3px);
@@ -262,7 +256,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.13em;
   text-transform: uppercase;
-  color: var(--blue);
+  color: var(--card-accent);
   margin-bottom: 8px;
 }
 .jumbo-count {
