@@ -46,15 +46,17 @@ export default function HomePage() {
           {/* Decorative bg shape — purely visual, behind everything */}
           <svg
             aria-hidden="true"
-            width="130" height="130"
+            width="110"
+            height="110"
             viewBox="0 0 24 24"
             fill="currentColor"
-            stroke="none"
+            preserveAspectRatio="xMidYMid meet"
             style={{
               position: "absolute",
-              bottom: -16, right: -16,
+              top: 10,
+              right: -20,
               color: "var(--blue)",
-              opacity: 0.06,
+              opacity: 0.05,
               pointerEvents: "none",
               zIndex: 0,
             }}
@@ -84,19 +86,23 @@ export default function HomePage() {
         >
           <svg
             aria-hidden="true"
-            width="130" height="130"
+            width="110"
+            height="110"
             viewBox="0 0 24 24"
             fill="currentColor"
-            stroke="none"
+            preserveAspectRatio="xMidYMid meet"
             style={{
               position: "absolute",
-              bottom: -16, right: -16,
+              top: 10,
+              right: -20,
               color: "var(--blue)",
-              opacity: 0.06,
+              opacity: 0.05,
               pointerEvents: "none",
               zIndex: 0,
             }}
           >
+            <path d="M7 2v2M17 2v2M3 8h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Z" />
+          </svg>
             <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
             <rect x="3" y="10" width="18" height="12" rx="0" />
           </svg>
