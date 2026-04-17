@@ -220,8 +220,8 @@ body {
   border-radius: var(--radius-lg);
   border: 1.5px solid var(--border);
 
-  /* default fallback */
-  border-top: 4px solid var(--accent-1);
+  --card-accent: var(--accent-1);
+  border-top: 4px solid var(--card-accent);
 
   background: var(--warm-white);
   cursor: pointer;
@@ -280,18 +280,22 @@ body {
 .jumbo-arrow {
   align-self: flex-end;
   margin-top: 18px;
-  width: 34px; height: 34px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid var(--border);
+
+  border: 1.5px solid var(--card-accent);
   color: var(--ink-muted);
+
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
+
 .jumbo-card:hover .jumbo-arrow {
-  background: var(--blue);
-  border-color: var(--blue);
+  background: var(--card-accent);
+  border-color: var(--card-accent);
   color: #fff;
 }
 @media (max-width: 480px) { .jumbo-grid { grid-template-columns: 1fr; } }
