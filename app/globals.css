@@ -5,14 +5,12 @@
 }
 
 :root {
-  /* Brand blues */
   --blue:          #334eac;
   --blue-dark:     #253a8a;
   --blue-light:    #bad6eb;
   --blue-soft:     #e8f0fb;
   --blue-muted:    rgba(51, 78, 172, 0.12);
 
-  /* Warm neutrals */
   --cream:         #fff9ef;
   --warm-white:    #ffffff;
   --ink:           #1a1a2e;
@@ -21,11 +19,9 @@
   --border:        #dde3f0;
   --border-light:  #eef1f8;
 
-  /* Accents */
   --sage:          #5a7a65;
   --sage-light:    #7aa88a;
 
-  /* Shadows */
   --shadow-sm:  0 1px 4px rgba(51,78,172,0.06);
   --shadow-md:  0 4px 16px rgba(51,78,172,0.10);
   --shadow-lg:  0 8px 32px rgba(51,78,172,0.14);
@@ -162,7 +158,7 @@ body {
   justify-content: center;
   cursor: pointer;
   box-shadow: var(--shadow-md);
-  transition: background 0.15s, box-shadow 0.15s;
+  transition: background 0.15s;
   color: #fff;
 }
 .hamburger:hover { background: var(--blue-dark); }
@@ -171,7 +167,7 @@ body {
    PAGE WRAPPER
 ════════════════════════════════ */
 .app-wrapper {
-  max-width: 780px;
+  max-width: 820px;
   margin: 0 auto;
   padding: 80px 20px 100px;
 }
@@ -196,7 +192,6 @@ body {
   font-size: 0.9rem;
   margin-top: 5px;
   font-weight: 400;
-  letter-spacing: 0.01em;
 }
 
 /* ════════════════════════════════
@@ -208,6 +203,8 @@ body {
   gap: 16px;
   margin-top: 4px;
 }
+
+/* Both cards identical — no filled colour difference */
 .jumbo-card {
   position: relative;
   display: flex;
@@ -216,6 +213,7 @@ body {
   padding: 28px 24px 22px;
   border-radius: var(--radius-lg);
   border: 1.5px solid var(--border);
+  border-top: 4px solid var(--blue);
   background: var(--warm-white);
   cursor: pointer;
   color: inherit;
@@ -228,13 +226,15 @@ body {
   transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
 }
-.jumbo-card.inventory { border-top: 4px solid var(--blue); }
-.jumbo-card.calendar  { border-top: 4px solid var(--blue-light); }
+
 .jumbo-card-bg {
   position: absolute;
   bottom: -10px; right: -10px;
+  color: var(--blue);
   opacity: 0.05;
+  pointer-events: none;
 }
+
 .jumbo-label {
   font-size: 0.7rem;
   font-weight: 700;
@@ -243,7 +243,6 @@ body {
   color: var(--blue);
   margin-bottom: 8px;
 }
-.jumbo-card.calendar .jumbo-label { color: var(--ink-muted); }
 .jumbo-count {
   font-family: var(--font-display);
   font-size: clamp(2.4rem, 7vw, 3.2rem);
@@ -372,6 +371,18 @@ body {
 }
 
 /* ════════════════════════════════
+   ITEM GRID (2-col)
+════════════════════════════════ */
+.item-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 560px) {
+  .item-grid { grid-template-columns: 1fr; }
+}
+
+/* ════════════════════════════════
    FORM CARD
 ════════════════════════════════ */
 .form-card {
@@ -385,29 +396,27 @@ body {
 .structured-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
   max-width: 540px;
 }
-.form-section {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 18px;
-  background: var(--blue-soft);
-  border: 1px solid var(--blue-light);
-  border-radius: var(--radius-lg);
+
+/* ── Flat divider between field groups ── */
+.form-divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 0;
 }
-.form-section-title {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  color: var(--blue);
+
+/* ── Field group header: label + "Add new" link inline ── */
+.field-group-header {
   display: flex;
   align-items: center;
-  gap: 7px;
+  justify-content: space-between;
+  margin-bottom: 7px;
 }
-.form-section-title svg { opacity: 0.8; }
+.field-group-header .form-label {
+  margin-bottom: 0;
+}
 
 .form-row {
   display: flex;
@@ -426,8 +435,16 @@ body {
   font-weight: 600;
   color: var(--ink-light);
   letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-.required { color: var(--blue); margin-left: 2px; }
+.form-label-hint {
+  font-weight: 400;
+  color: var(--ink-muted);
+  font-size: 0.76rem;
+}
+.required { color: var(--blue); margin-left: 1px; }
 
 .form-input {
   padding: 11px 14px;
@@ -455,27 +472,26 @@ body {
   cursor: pointer;
 }
 
-/* ── Add-new trigger link ── */
+/* ── Add-new trigger ── */
 .add-new-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.8rem;
+  gap: 4px;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--blue);
   background: none;
   border: none;
   cursor: pointer;
-  padding: 3px 0;
+  padding: 2px 0;
   transition: opacity 0.15s;
-  text-decoration: none;
-  margin-top: -2px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-.add-new-trigger:hover { opacity: 0.72; }
-.add-new-trigger svg { flex-shrink: 0; }
+.add-new-trigger:hover { opacity: 0.65; }
 
 /* ════════════════════════════════
-   MODAL (add-new sheet)
+   MODAL
 ════════════════════════════════ */
 .modal-backdrop {
   position: fixed;
@@ -536,8 +552,7 @@ body {
 .modal-actions .btn { flex: 1; }
 
 @keyframes backdropIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from { opacity: 0; } to { opacity: 1; }
 }
 @keyframes sheetUp {
   from { transform: translateY(40px); opacity: 0; }
@@ -546,25 +561,6 @@ body {
 @keyframes sheetFade {
   from { transform: scale(0.97) translateY(6px); opacity: 0; }
   to   { transform: scale(1)    translateY(0);   opacity: 1; }
-}
-
-/* ── Location preview ── */
-.location-preview {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: var(--blue-soft);
-  border: 1px solid var(--blue-light);
-  border-radius: var(--radius);
-}
-.location-preview-label {
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: var(--blue);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  white-space: nowrap;
 }
 
 /* ════════════════════════════════
@@ -591,10 +587,7 @@ body {
 .btn:active { transform: scale(0.97); }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
-.btn-primary {
-  background: var(--blue);
-  color: #fff;
-}
+.btn-primary { background: var(--blue); color: #fff; }
 .btn-primary:hover:not(:disabled) {
   background: var(--blue-dark);
   box-shadow: 0 4px 14px rgba(51, 78, 172, 0.35);
@@ -629,12 +622,10 @@ body {
   border: 1.5px solid var(--border);
   border-left: 3px solid var(--blue-light);
   border-radius: var(--radius-lg);
-  padding: 15px 16px;
-  margin-bottom: 10px;
+  padding: 14px 15px;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
   box-shadow: var(--shadow-sm);
   transition: box-shadow 0.18s, border-left-color 0.18s;
   animation: fadeSlideIn 0.25s ease both;
@@ -643,28 +634,51 @@ body {
   box-shadow: var(--shadow-md);
   border-left-color: var(--blue);
 }
+
+/* In grid mode, stack info above actions */
+.item-grid .item-card {
+  flex-direction: column;
+}
+
+/* In single-col mode, put info + actions side by side */
+.item-card {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
 .item-card-top {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   flex-wrap: wrap;
 }
 .item-info { flex: 1; min-width: 0; }
-.item-name {
-  font-weight: 600;
-  font-size: 0.97rem;
-  color: var(--ink);
-}
+.item-name { font-weight: 600; font-size: 0.97rem; color: var(--ink); }
 .item-location { margin-top: 5px; }
 .item-dates {
-  font-size: 0.73rem;
+  font-size: 0.72rem;
   color: var(--ink-muted);
   margin-top: 5px;
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
 }
-.item-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.item-actions {
+  display: flex;
+  gap: 7px;
+  flex-shrink: 0;
+  align-items: flex-start;
+}
+
+/* In grid: actions sit at bottom of card */
+.item-grid .item-card {
+  flex-direction: column;
+  justify-content: space-between;
+}
+.item-grid .item-actions {
+  margin-top: 4px;
+}
 
 /* ════════════════════════════════
    TAGS
@@ -676,7 +690,7 @@ body {
   border: 1px solid var(--blue-light);
   padding: 2px 10px;
   border-radius: 20px;
-  font-size: 0.78rem;
+  font-size: 0.77rem;
   font-weight: 500;
 }
 .category-tag {
@@ -684,9 +698,9 @@ body {
   background: rgba(90, 122, 101, 0.1);
   color: var(--sage);
   border: 1px solid rgba(90, 122, 101, 0.22);
-  padding: 2px 10px;
+  padding: 2px 9px;
   border-radius: 20px;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
@@ -813,4 +827,5 @@ body {
   .event-card { flex-wrap: wrap; }
   .app-wrapper { padding-top: 72px; }
   .filter-row .form-group { min-width: 100%; }
+  .item-card { flex-direction: column; }
 }
