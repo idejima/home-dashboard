@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import "./globals.css";
 
+interface Me { id: number; name: string; username: string; role: string; }
+
 function HamburgerIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -62,6 +64,23 @@ function SettingsIcon() {
     </svg>
   );
 }
+function UserIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+function LogOutIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" x2="9" y1="12" y2="12" />
+    </svg>
+  );
+}
 
 const NAV = [
   { label: "Home",          href: "/",              Icon: HomeIcon },
@@ -70,20 +89,33 @@ const NAV = [
   { label: "Calendar",      href: "/calendar",      Icon: CalIcon },
 ];
 
-const NAV_BOTTOM = [
-  { label: "Manage Lists",  href: "/admin",         Icon: SettingsIcon },
-];
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-  const router = useRouter();
+  const [open, setOpen]   = useState(false);
+  const [me, setMe]       = useState<Me | null>(null);
+  const pathname          = usePathname();
+  const router            = useRouter();
+  const isLoginPage       = pathname === "/login";
 
   useEffect(() => { setOpen(false); }, [pathname]);
+
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
+
+  useEffect(() => {
+    if (isLoginPage) return;
+    fetch("/api/auth/me")
+      .then(r => r.ok ? r.json() : null)
+      .then(data => setMe(data))
+      .catch(() => setMe(null));
+  }, [isLoginPage, pathname]);
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setMe(null);
+    router.push("/login");
+  }
 
   function navigate(href: string) {
     setOpen(false);
@@ -103,48 +135,75 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <title>Home Dashboard</title>
       </head>
       <body>
-        <button className="hamburger" onClick={() => setOpen(true)} aria-label="Open menu">
-          <HamburgerIcon />
-        </button>
-
-        <div className={`sidebar-overlay${open ? " open" : ""}`} onClick={() => setOpen(false)} />
-
-        <nav className={`sidebar${open ? " open" : ""}`}>
-          <div className="sidebar-top">
-            <span className="sidebar-logo">Home Dashboard</span>
-            <button className="sidebar-close" onClick={() => setOpen(false)} aria-label="Close menu">
-              <CloseIcon />
+        {/* Don't show hamburger/sidebar on login page */}
+        {!isLoginPage && (
+          <>
+            <button className="hamburger" onClick={() => setOpen(true)} aria-label="Open menu">
+              <HamburgerIcon />
             </button>
-          </div>
 
-          <div className="sidebar-nav">
-            {NAV.map(({ label, href, Icon }) => (
-              <button
-                key={href}
-                className={`sidebar-link${pathname === href ? " active" : ""}`}
-                onClick={() => navigate(href)}
-              >
-                <Icon />{label}
-              </button>
-            ))}
-          </div>
+            <div className={`sidebar-overlay${open ? " open" : ""}`} onClick={() => setOpen(false)} />
 
-          {/* Bottom section — operator links */}
-          <div className="sidebar-bottom-nav">
-            <div className="sidebar-bottom-label">Operator</div>
-            {NAV_BOTTOM.map(({ label, href, Icon }) => (
-              <button
-                key={href}
-                className={`sidebar-link sidebar-link-muted${pathname === href ? " active" : ""}`}
-                onClick={() => navigate(href)}
-              >
-                <Icon />{label}
-              </button>
-            ))}
-          </div>
+            <nav className={`sidebar${open ? " open" : ""}`}>
+              <div className="sidebar-top">
+                <span className="sidebar-logo">Home Dashboard</span>
+                <button className="sidebar-close" onClick={() => setOpen(false)} aria-label="Close menu">
+                  <CloseIcon />
+                </button>
+              </div>
 
-          <div className="sidebar-footer">Home Dash by Jake</div>
-        </nav>
+              {/* User info strip */}
+              {me && (
+                <div className="sidebar-user">
+                  <div className="sidebar-user-name">{me.name}</div>
+                  <div className="sidebar-user-meta">
+                    @{me.username} · <span className={`role-badge role-${me.role}`}>{me.role}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="sidebar-nav">
+                {NAV.map(({ label, href, Icon }) => (
+                  <button
+                    key={href}
+                    className={`sidebar-link${pathname === href ? " active" : ""}`}
+                    onClick={() => navigate(href)}
+                  >
+                    <Icon />{label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Bottom: operator + profile + logout */}
+              <div className="sidebar-bottom-nav">
+                {me?.role === "admin" && (
+                  <>
+                    <div className="sidebar-bottom-label">Operator</div>
+                    <button
+                      className={`sidebar-link sidebar-link-muted${pathname === "/admin" ? " active" : ""}`}
+                      onClick={() => navigate("/admin")}
+                    >
+                      <SettingsIcon /> Manage Lists
+                    </button>
+                  </>
+                )}
+
+                <div className="sidebar-bottom-label" style={{ marginTop: me?.role === "admin" ? 10 : 0 }}>Account</div>
+                <button
+                  className={`sidebar-link sidebar-link-muted${pathname === "/profile" ? " active" : ""}`}
+                  onClick={() => navigate("/profile")}
+                >
+                  <UserIcon /> My Profile
+                </button>
+                <button className="sidebar-link sidebar-link-muted sidebar-link-danger" onClick={handleLogout}>
+                  <LogOutIcon /> Sign Out
+                </button>
+              </div>
+
+              <div className="sidebar-footer">Home Dash by Jake</div>
+            </nav>
+          </>
+        )}
 
         {children}
       </body>
