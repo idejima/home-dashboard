@@ -935,6 +935,162 @@ body:has(.modal-backdrop) {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ════════════════════════════════
+   LOGIN PAGE
+════════════════════════════════ */
+.login-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: var(--cream);
+}
+.login-card {
+  background: var(--warm-white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px 40px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: var(--shadow-lg);
+}
+.login-header {
+  margin-bottom: 28px;
+  text-align: center;
+}
+.login-title {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+.login-subtitle {
+  color: var(--ink-muted);
+  font-size: 0.88rem;
+  margin-top: 5px;
+}
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.login-error {
+  color: #c0392b;
+  font-size: 0.85rem;
+  background: rgba(192, 57, 43, 0.06);
+  border: 1px solid rgba(192, 57, 43, 0.18);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+}
+
+/* ════════════════════════════════
+   ROLE BADGE
+════════════════════════════════ */
+.role-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.role-admin {
+  background: rgba(51, 78, 172, 0.12);
+  color: var(--blue);
+  border: 1px solid rgba(51, 78, 172, 0.22);
+}
+.role-member {
+  background: rgba(90, 122, 101, 0.1);
+  color: var(--sage);
+  border: 1px solid rgba(90, 122, 101, 0.22);
+}
+
+/* ════════════════════════════════
+   SIDEBAR USER STRIP
+════════════════════════════════ */
+.sidebar-user {
+  padding: 12px 22px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.sidebar-user-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #fff;
+}
+.sidebar-user-meta {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.sidebar-user-meta .role-badge {
+  font-size: 0.62rem;
+  padding: 1px 6px;
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.8);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.sidebar-link-danger {
+  color: rgba(255, 120, 100, 0.8) !important;
+}
+.sidebar-link-danger:hover {
+  color: rgb(255, 120, 100) !important;
+  background: rgba(255, 100, 80, 0.1) !important;
+}
+
+/* ════════════════════════════════
+   PROFILE PAGE
+════════════════════════════════ */
+.profile-readonly {
+  padding: 10px 14px;
+  background: var(--cream);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  color: var(--ink-muted);
+}
+
+/* ════════════════════════════════
+   ADMIN — USER LIST
+════════════════════════════════ */
+.admin-user-item {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.admin-user-info {
+  flex: 1;
+  min-width: 0;
+}
+.admin-user-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.admin-user-meta {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  margin-top: 2px;
+}
+.you-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  border: 1px solid var(--blue-light);
+}
+
+/* ════════════════════════════════
    MOBILE
 ════════════════════════════════ */
 @media (max-width: 500px) {
