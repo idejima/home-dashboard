@@ -9,8 +9,14 @@ interface InventoryItem {
   category: string;
   room: string;
   area: string;
+  created_by: number | null;
   created_at: string;
   updated_at: string;
+}
+
+interface Me {
+  id: number;
+  role: "admin" | "member";
 }
 
 function formatShortDate(iso: string) {
@@ -86,6 +92,7 @@ export default function InventoryPage() {
   const router = useRouter();
 
   const [items, setItems]     = useState<InventoryItem[]>([]);
+  const [me, setMe]           = useState<Me | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState("");
   const [search, setSearch]   = useState("");
@@ -93,20 +100,30 @@ export default function InventoryPage() {
   const [filterCategory, setFilterCategory] = useState("All");
   const [showFilters, setShowFilters]       = useState(false);
 
-  useEffect(() => { fetchItems(); }, []);
-
-  async function fetchItems() {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch("/api/items");
-      if (!res.ok) throw new Error();
-      setItems(await res.json());
-    } catch {
-      setError("Could not load inventory. Please refresh.");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    async function load() {
+      try {
+        const [itemsRes, meRes] = await Promise.all([
+          fetch("/api/items"),
+          fetch("/api/auth/me"),
+        ]);
+        if (!itemsRes.ok) throw new Error();
+        setItems(await itemsRes.json());
+        if (meRes.ok) setMe(await meRes.json());
+      } catch {
+        setError("Could not load inventory. Please refresh.");
+      } finally {
+        setLoading(false);
+      }
     }
+    load();
+  }, []);
+
+  // Can the current user edit/delete a given item?
+  function canModify(item: InventoryItem): boolean {
+    if (!me) return false;
+    if (me.role === "admin") return true;
+    return item.created_by === me.id;
   }
 
   async function removeItem(id: number) {
@@ -117,7 +134,8 @@ export default function InventoryPage() {
       if (!res.ok) throw new Error();
     } catch {
       alert("Failed to delete. Please refresh.");
-      fetchItems();
+      // re-fetch to restore
+      fetch("/api/items").then(r => r.json()).then(setItems).catch(() => {});
     }
   }
 
@@ -143,8 +161,6 @@ export default function InventoryPage() {
     Array.from(new Set(items.map(i => i.category).filter(Boolean))).sort(), [items]);
 
   const hasActiveFilters = filterRoom !== "All" || filterCategory !== "All";
-
-  // 2-column grid only when 2+ results
   const useGrid = filteredItems.length >= 2;
 
   return (
@@ -251,40 +267,50 @@ export default function InventoryPage() {
           </div>
         ) : (
           <div className={useGrid ? "item-grid" : undefined}>
-            {filteredItems.map(item => (
-              <div key={item.id} className="item-card">
-                <div className="item-info">
-                  <div className="item-card-top">
-                    <span className="item-name">{item.name}</span>
-                    {item.category && <span className="category-tag">{item.category}</span>}
+            {filteredItems.map(item => {
+              const allowed = canModify(item);
+              const locationLabel = buildLocationLabel(item.room, item.area);
+
+              return (
+                <div key={item.id} className="item-card">
+                  <div className="item-info">
+                    <div className="item-card-top">
+                      <span className="item-name">{item.name}</span>
+                      {item.category && <span className="category-tag">{item.category}</span>}
+                    </div>
+                    {locationLabel && (
+                      <div className="item-location">
+                        <span className="location-tag">{locationLabel}</span>
+                      </div>
+                    )}
+                    <div className="item-dates">
+                      <span>Added {formatShortDate(item.created_at)}</span>
+                      {item.updated_at && item.updated_at !== item.created_at && (
+                        <span>· Updated {formatShortDate(item.updated_at)}</span>
+                      )}
+                    </div>
                   </div>
-                  {(item.room || item.area) && (
-                    <div className="item-location">
-                      <span className="location-tag">
-                        {buildLocationLabel(item.room, item.area)}
-                      </span>
+
+                  {/* Only show action buttons if user has permission */}
+                  {allowed && (
+                    <div className="item-actions">
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => router.push(`/inventory/${item.id}/edit`)}
+                      >
+                        <EditIcon /> Edit
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => removeItem(item.id)}
+                      >
+                        <TrashIcon />
+                      </button>
                     </div>
                   )}
-                  <div className="item-dates">
-                    <span>Added {formatShortDate(item.created_at)}</span>
-                    {item.updated_at && item.updated_at !== item.created_at && (
-                      <span>· Updated {formatShortDate(item.updated_at)}</span>
-                    )}
-                  </div>
                 </div>
-                <div className="item-actions">
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => router.push(`/inventory/${item.id}/edit`)}
-                  >
-                    <EditIcon /> Edit
-                  </button>
-                  <button className="btn btn-danger btn-sm" onClick={() => removeItem(item.id)}>
-                    <TrashIcon />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
