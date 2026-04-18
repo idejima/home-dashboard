@@ -183,7 +183,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       className={`sidebar-link sidebar-link-muted${pathname === "/admin" ? " active" : ""}`}
                       onClick={() => navigate("/admin")}
                     >
-                      <SettingsIcon /> Manage Lists
+                      <SettingsIcon /> Settings
                     </button>
                   </>
                 )}
