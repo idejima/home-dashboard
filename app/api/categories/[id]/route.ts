@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { requireAdmin } from "@/lib/auth";
 
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    await requireAdmin();
     const { name } = await request.json();
     if (!name?.trim()) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -19,6 +21,7 @@ export async function PUT(
     }
     return NextResponse.json(result.rows[0]);
   } catch (err) {
+    if (err instanceof Response) return err;
     console.error("PUT /api/categories/[id] error:", err);
     return NextResponse.json({ error: "Failed to update" }, { status: 500 });
   }
@@ -29,6 +32,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    await requireAdmin();
     const result = await pool.query(
       "DELETE FROM categories WHERE id = $1",
       [params.id]
@@ -38,6 +42,7 @@ export async function DELETE(
     }
     return NextResponse.json({ success: true });
   } catch (err) {
+    if (err instanceof Response) return err;
     console.error("DELETE /api/categories/[id] error:", err);
     return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
   }
