@@ -1,14 +1,7 @@
 import { NextResponse } from "next/server";
 import pool, { initDB } from "@/lib/db";
 import crypto from "crypto";
-
-function hashPassword(password: string): string {
-  // SHA-256 with a fixed app salt — simple, no bcrypt dependency needed
-  return crypto
-    .createHmac("sha256", process.env.PASSWORD_SECRET ?? "homedash-secret-change-me")
-    .update(password)
-    .digest("hex");
-}
+import { hashPassword } from "@/lib/security";
 
 export async function POST(request: Request) {
   try {
@@ -64,6 +57,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Login failed" }, { status: 500 });
   }
 }
-
-// Also export hashPassword so it can be used by the user management API
-export { hashPassword };
