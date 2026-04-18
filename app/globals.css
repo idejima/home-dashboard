@@ -433,9 +433,10 @@ body {
   padding: 14px 15px;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   box-shadow: var(--shadow-sm);
   transition: box-shadow 0.18s, border-left-color 0.18s;
   animation: fadeSlideIn 0.25s ease both;
@@ -445,7 +446,10 @@ body {
   border-left-color: var(--blue);
 }
 .item-info {
-  flex: 1;
+  /* Grows to fill available space but won't shrink below 160px.
+     Once the card is too narrow to fit info + actions side-by-side,
+     flex-wrap kicks in and actions move below. */
+  flex: 1 1 160px;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -468,12 +472,13 @@ body {
   flex-wrap: wrap;
 }
 .item-actions {
+  /* Shrink is 0 so buttons never compress — they wrap instead */
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex-shrink: 0;
   align-items: stretch;
-  min-width: 72px;
+  min-width: 80px;
 }
 .item-actions .btn {
   justify-content: center;
@@ -937,8 +942,6 @@ body:has(.modal-backdrop) {
   .event-card { flex-wrap: wrap; }
   .app-wrapper { padding-top: 72px; }
   .filter-row .form-group { min-width: 100%; }
-  .item-card { flex-direction: column; }
-  .item-actions { flex-direction: row; min-width: unset; }
   .admin-add-row { flex-direction: column; }
   .admin-add-row .btn { width: 100%; }
   .admin-item-actions { flex-direction: column; }
