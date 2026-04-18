@@ -461,7 +461,7 @@ body {
   gap: 7px;
   flex-wrap: wrap;
 }
-.item-name { font-weight: 600; font-size: 1.05rem; color: var(--ink); }
+.item-name { font-weight: 600; font-size: 1.15rem; color: var(--ink); }
 .item-location { margin-top: 3px; }
 .item-dates {
   font-size: 0.72rem;
