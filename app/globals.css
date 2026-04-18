@@ -488,10 +488,16 @@ body {
    TAGS
 ════════════════════════════════ */
 .location-tag {
-  display: inline-block;
-  color: var(--ink-muted);
-  font-size: 0.8rem;
-  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink-light);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+.location-tag svg {
+  flex-shrink: 0;
+  opacity: 0.55;
 }
 .category-tag {
   display: inline-block;
