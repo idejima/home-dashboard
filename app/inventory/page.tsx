@@ -10,6 +10,7 @@ interface InventoryItem {
   room: string;
   area: string;
   created_by: number | null;
+  creator_name: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -119,7 +120,6 @@ export default function InventoryPage() {
     load();
   }, []);
 
-  // Can the current user edit/delete a given item?
   function canModify(item: InventoryItem): boolean {
     if (!me) return false;
     if (me.role === "admin") return true;
@@ -134,7 +134,6 @@ export default function InventoryPage() {
       if (!res.ok) throw new Error();
     } catch {
       alert("Failed to delete. Please refresh.");
-      // re-fetch to restore
       fetch("/api/items").then(r => r.json()).then(setItems).catch(() => {});
     }
   }
@@ -270,6 +269,7 @@ export default function InventoryPage() {
             {filteredItems.map(item => {
               const allowed = canModify(item);
               const locationLabel = buildLocationLabel(item.room, item.area);
+              const isMine = item.created_by === me?.id;
 
               return (
                 <div key={item.id} className="item-card">
@@ -278,6 +278,7 @@ export default function InventoryPage() {
                       <span className="item-name">{item.name}</span>
                       {item.category && <span className="category-tag">{item.category}</span>}
                     </div>
+
                     {locationLabel && (
                       <div className="item-location">
                         <span className="location-tag">
@@ -289,7 +290,14 @@ export default function InventoryPage() {
                         </span>
                       </div>
                     )}
+
                     <div className="item-dates">
+                      {item.creator_name && (
+                        <span className="item-creator">
+                          {isMine ? "You" : item.creator_name}
+                        </span>
+                      )}
+                      {item.creator_name && <span className="item-dates-sep">·</span>}
                       <span>Added {formatShortDate(item.created_at)}</span>
                       {item.updated_at && item.updated_at !== item.created_at && (
                         <span>· Updated {formatShortDate(item.updated_at)}</span>
@@ -297,7 +305,6 @@ export default function InventoryPage() {
                     </div>
                   </div>
 
-                  {/* Only show action buttons if user has permission */}
                   {allowed && (
                     <div className="item-actions">
                       <button
