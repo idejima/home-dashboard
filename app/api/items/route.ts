@@ -7,8 +7,13 @@ export async function GET() {
     await requireAuth();
     await initDB();
     const result = await pool.query(
-      `SELECT id, name, category, room, area, created_by, created_at, updated_at
-       FROM inventory_items ORDER BY created_at ASC`
+      `SELECT
+         i.id, i.name, i.category, i.room, i.area,
+         i.created_by, i.created_at, i.updated_at,
+         u.name AS creator_name
+       FROM inventory_items i
+       LEFT JOIN users u ON u.id = i.created_by
+       ORDER BY i.created_at ASC`
     );
     return NextResponse.json(result.rows);
   } catch (err) {
@@ -35,7 +40,10 @@ export async function POST(request: Request) {
        RETURNING id, name, category, room, area, created_by, created_at, updated_at`,
       [name.trim(), (category ?? "").trim(), (room ?? "").trim(), (area ?? "").trim(), user.id]
     );
-    return NextResponse.json(result.rows[0], { status: 201 });
+
+    // Attach creator name
+    const row = result.rows[0];
+    return NextResponse.json({ ...row, creator_name: user.name }, { status: 201 });
   } catch (err) {
     if (err instanceof Response) return err;
     console.error("POST /api/items error:", err);
