@@ -468,8 +468,16 @@ body {
   color: var(--ink-muted);
   margin-top: 2px;
   display: flex;
+  align-items: center;
   gap: 4px;
   flex-wrap: wrap;
+}
+.item-creator {
+  font-weight: 600;
+  color: var(--blue);
+}
+.item-dates-sep {
+  opacity: 0.5;
 }
 .item-actions {
   /* Shrink is 0 so buttons never compress — they wrap instead */
